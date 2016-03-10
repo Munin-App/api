@@ -1,28 +1,35 @@
-from munin.models import database
+import datetime
+
 import bcrypt
+from peewee import CharField, DateTimeField
+
+from munin.models import Model
 
 
-class User(object):
+class User(Model):
+    username = CharField(unique=True)
+    password = CharField()
+    created = DateTimeField(default=datetime.datetime.utcnow())
 
     @staticmethod
-    def create(username, password):
-        query = 'INSERT INTO users (username, password) VALUES(:username, :password)'
-
+    def add(username, password):
         password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         password = password.decode('utf-8')
 
-        database.query(query, username=username, password=password)
+        user = User.create(username=username, password=password)
+
+        return user
 
     @staticmethod
     def authenticate(username, password):
-        query = 'SELECT password FROM users WHERE username=:username'
-
         try:
-            hashed_password = database.query(query, username=username).all()[0].password
+            user = User.get(User.username == username)
+            password = password.encode('utf-8')
+            computed = user.password.encode('utf-8')
 
-            if bcrypt.hashpw(password.encode('utf-8'), hashed_password.encode('utf-8')) == hashed_password.encode('utf-8'):
-                return True
-        except Exception as e:
-            raise e
+            if bcrypt.hashpw(password, computed) == computed:
+                return user
+        except User.DoesNotExist:
+            pass
 
-        return False
+        return None
