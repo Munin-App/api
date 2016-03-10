@@ -8,7 +8,7 @@ class User(object):
     def create(username, password):
         query = 'INSERT INTO users (username, password) VALUES(:username, :password)'
 
-        username = username.encode('utf-8')
         password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        password = password.decode('utf-8')
 
         database.query(query, username=username, password=password)
