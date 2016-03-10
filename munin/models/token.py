@@ -1,28 +1,42 @@
-from munin.models import database
-import uuid
+from munin.models import Model, User
+from peewee import CharField, DateTimeField, BooleanField, ForeignKeyField
+import os
+import hashlib
+import datetime
 
 
-class Token(object):
+class Token(Model):
+    token = CharField(unique=True)
+    name = CharField()
+    created = DateTimeField(default=datetime.datetime.utcnow())
+    last_used = DateTimeField(null=True)
+    read_only = BooleanField(default=True)
+    user = ForeignKeyField(User, related_name='tokens')
 
     @staticmethod
-    def create(user_id, name, read_only=True):
-        query = 'SELECT COUNT(*) FROM users WHERE id=:user_id'
+    def add(user_id, name, read_only=True):
+        token = hashlib.sha256(os.urandom(256)).hexdigest()
 
-        if database.query(query, user_id=user_id)[0][0] == 0:
-            raise Exception('User does not exist')
+        while Token.select().where(Token.token == token).count() != 0:
+            token = hashlib.sha256(os.urandom(256)).hexdigest()
 
-        token = None
-        exists = True
+        try:
+            token = Token.create(token=token, name=name, read_only=read_only,
+                                 user=User.get(User.id == user_id))
 
-        while exists:
-            token = uuid.uuid4().hex
+            return token
+        except User.DoesNotExist:
+            pass
 
-            query = 'SELECT COUNT(*) FROM tokens WHERE token=:token'
+        return None
 
-            if database.query(query, token=token)[0][0] == 0:
-                exists = False
+    @staticmethod
+    def authenticate(token):
+        try:
+            token = Token.get(Token.token == token)
 
-        query = 'INSERT INTO tokens (token, name, read_only, user_id) VALUES(:token, :name, :read_only, :user_id)'
+            return token.user
+        except Token.DoesNotExist:
+            pass
 
-        database.query(query, token=token, name=name,
-                       read_only=read_only, user_id=user_id)
+        return None
