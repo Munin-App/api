@@ -9,5 +9,6 @@ database = PostgresqlDatabase(os.environ['munin_db_name'],
 from munin.models.model import Model
 from munin.models.user import User
 from munin.models.token import Token
+from munin.models.location import Location
 
-database.create_tables([User, Token], safe=True)
+database.create_tables([User, Token, Location], safe=True)
