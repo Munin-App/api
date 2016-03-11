@@ -1,6 +1,9 @@
-from peewee import SqliteDatabase
+import os
+from peewee import PostgresqlDatabase
 
-database = SqliteDatabase('munin.db')
+database = PostgresqlDatabase(os.environ['munin_db_name'],
+                              user=os.environ['munin_db_user'],
+                              password=os.environ['munin_db_password'])
 
 from munin.models.model import Model
 from munin.models.user import User
