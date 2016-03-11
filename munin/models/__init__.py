@@ -3,7 +3,8 @@ from peewee import PostgresqlDatabase
 
 database = PostgresqlDatabase(os.environ['munin_db_name'],
                               user=os.environ['munin_db_user'],
-                              password=os.environ['munin_db_password'])
+                              password=os.environ['munin_db_password'],
+                              host=os.environ['munin_db_host'])
 
 from munin.models.model import Model
 from munin.models.user import User
