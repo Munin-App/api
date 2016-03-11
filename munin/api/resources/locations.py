@@ -36,6 +36,7 @@ class LocationResource(object):
     def on_get(self, req, resp):
         limit = req.params.get('limit', 100)
         offset = req.params.get('offset', 0)
+        sort = req.params.get('sort', 'desc')
         token = req.get_header('X-Authorization')
 
         if token is None:
@@ -53,6 +54,11 @@ class LocationResource(object):
 
         try:
             locations = Location.select().where(Location.user == token.user)
+
+            if sort == 'desc':
+                locations = locations.order_by(Location.timestamp.desc())
+            else:
+                locations = locations.order_by(Location.timestamp)
 
             response = {
                 'meta': {
