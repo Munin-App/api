@@ -49,7 +49,7 @@ class LocationResource(object):
             return
 
         try:
-            locations = Location.select().where(Location.user_id == token.user_id)
+            locations = Location.select().where(Location.user == token.user)
 
             response = {
                 'meta': {
