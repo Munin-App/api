@@ -1,11 +1,11 @@
 from munin.models import Model, User, Token
-from peewee import DateTimeField, FloatField, ForeignKeyField
+from peewee import DateTimeField, DoubleField, ForeignKeyField
 import datetime
 
 
 class Location(Model):
-    latitude = FloatField()
-    longitude = FloatField()
+    latitude = DoubleField()
+    longitude = DoubleField()
     timestamp = DateTimeField()
     user = ForeignKeyField(User, related_name='locations')
     token = ForeignKeyField(Token, related_name='data')
