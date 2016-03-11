@@ -50,7 +50,7 @@ class Token(Model):
         try:
             token = Token.get(Token.token == token)
 
-            return token.user
+            return token
         except Token.DoesNotExist:
             pass
 
