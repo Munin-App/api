@@ -13,6 +13,21 @@ class Token(Model):
     read_only = BooleanField(default=True)
     user = ForeignKeyField(User, related_name='tokens')
 
+    def serializeToJSON(self):
+        json = {
+            'id': self.id,
+            'token': self.token,
+            'name': self.name,
+            'created': self.created.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
+            'read_only': self.read_only,
+            'user_id': self.user.id
+        }
+
+        if self.last_used:
+            json['last_used'] = self.last_used.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+
+        return json
+
     @staticmethod
     def add(user_id, name, read_only=True):
         token = hashlib.sha256(os.urandom(256)).hexdigest()
