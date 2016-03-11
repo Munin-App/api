@@ -36,7 +36,10 @@ class LocationResource(object):
     def on_get(self, req, resp):
         limit = req.params.get('limit', 100)
         offset = req.params.get('offset', 0)
-        token = req.get_header('X-Authorization', req.params.get('token', None))
+        token = req.get_header('X-Authorization')
+
+        if token is None:
+            token = req.params.get('token', None)
 
         if token is None:
             resp.status = falcon.HTTP_401
